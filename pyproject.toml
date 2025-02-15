@@ -1,4 +1,6 @@
-[tool.uv]
+[project]
+name = "SR_project"
+version = "0.1.0"
 dependencies = [
     "fastapi",
     "uvicorn",
@@ -6,6 +8,10 @@ dependencies = [
     "pyyaml",
     "toml"
 ]
+
+[tool.uv]
+# Optional: Configure `uv` settings (not for dependencies)
+
 [tool.ruff]
 line-length = 88
 select = ["ALL"]
