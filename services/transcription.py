@@ -39,6 +39,7 @@ def transcribe_audio(audio_file: str | Path, retries: int = 3) -> str | None:
 
     Returns:
         str | None: Transcribed text if successful, otherwise None.
+
     """
     # Convert PosixPath to string if necessary
     if isinstance(audio_file, Path):
@@ -59,10 +60,13 @@ def transcribe_audio(audio_file: str | Path, retries: int = 3) -> str | None:
             result = model.transcribe(audio_file)
             return result["text"]
         except Exception as e:
-            logger.error("❌ Error during transcription: %s", e)
+            if isinstance(e, (KeyboardInterrupt, SystemExit)):
+                raise  # Don't suppress system exit signals
+
+            logger.exception("❌ Error during transcription")  # ✅ No need to pass 'e'
+
             if attempt < retries:
                 logger.info("🔄 Retrying in 2 seconds...")
                 time.sleep(2)
-
     logger.error("❌ Max retries reached. Could not transcribe the audio.")
     return None
