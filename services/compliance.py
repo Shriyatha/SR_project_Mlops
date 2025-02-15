@@ -1,8 +1,8 @@
 """Module for compliance checking and timestamp extraction in transcripts."""
 from __future__ import annotations
 
-from spacy.matcher import PhraseMatcher
 import spacy
+from spacy.matcher import PhraseMatcher
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -12,11 +12,10 @@ def check_compliance(
 ) -> dict[str, list[str]]:
     """Check if all required categories are present in the transcript."""
     transcript = transcript.lower()
-    missing_details = {
+    return {
         category: phrases for category, phrases in required_phrases.items()
         if not any(phrase.lower() in transcript for phrase in phrases)
     }
-    return missing_details
 
 
 def extract_timestamps(
