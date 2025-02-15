@@ -11,9 +11,18 @@ pipeline = SpeakerDiarization.from_pretrained("pyannote/speaker-diarization-3.0"
 MIN_SPEAKERS = 2  # Constant to replace magic number
 
 
-def analyze_speaker_diarization(audio_file):
-    """Performs speaker diarization and computes speaking ratio, interruptions, and TTFT."""
-    
+def analyze_speaker_diarization(audio_file: str) -> dict[str, Any]:
+    """Perform speaker diarization.
+
+    Computes speaking ratio, interruptions, and TTFT.
+
+    Args:
+        audio_file (str): Path to the audio file.
+
+    Returns:
+        dict: A dictionary containing speaking ratio, interruptions, and TTFT.
+
+    """
     # Run speaker diarization
     diarization = pipeline(audio_file)
 
@@ -26,8 +35,7 @@ def analyze_speaker_diarization(audio_file):
         speaker_durations[speaker] += duration
         speaker_turns.append((turn.start, turn.end, speaker))
 
-    if len(speaker_durations) < 2:
-        print("Warning: Only one speaker detected! Diarization may have failed.")
+    if len(speaker_durations) < MIN_SPEAKERS:
         return {"speaking_ratio": 1.0, "interruptions": 0, "ttft": 0.0}
 
     # Identify customer and agent
@@ -41,20 +49,31 @@ def analyze_speaker_diarization(audio_file):
 
     # Count agent interruptions
     agent_interruptions = sum(
-        1 for i in range(1, len(speaker_turns))
-        if speaker_turns[i][2] == agent_speaker and speaker_turns[i-1][2] == customer_speaker and speaker_turns[i][0] < speaker_turns[i-1][1]
+        1
+        for i in range(1, len(speaker_turns))
+        if (
+            speaker_turns[i][2] == agent_speaker
+            and speaker_turns[i - 1][2] == customer_speaker
+            and speaker_turns[i][0] < speaker_turns[i - 1][1]
+        )
     )
+
 
     # Compute TTFT (Time to First Token)
     ttft_values = [
-        speaker_turns[i][0] - speaker_turns[i-1][1]
+        speaker_turns[i][0] - speaker_turns[i - 1][1]
         for i in range(1, len(speaker_turns))
-        if speaker_turns[i-1][2] == customer_speaker and speaker_turns[i][2] == agent_speaker
+        if (
+            speaker_turns[i - 1][2] == customer_speaker
+            and speaker_turns[i][2] == agent_speaker
+        )
     ]
+
     avg_ttft = sum(ttft_values) / len(ttft_values) if ttft_values else 0.0
+
 
     return {
         "speaking_ratio": round(speaking_ratio, 2),
         "interruptions": agent_interruptions,
-        "ttft": round(avg_ttft, 2)
+        "ttft": round(avg_ttft, 2),
     }
