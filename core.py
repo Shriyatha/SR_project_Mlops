@@ -56,13 +56,29 @@ def validate_audio_file(file_path: str, supported_formats: list) -> bool:
         audio = AudioSegment.from_file(file_path)
         logger.info(f"Audio file loaded successfully: {file_path}")
         logger.info(f"Audio duration: {len(audio)} ms")
-        return True
     except CouldntDecodeError as e:
         logger.error(f"Invalid audio content: {e}")
         return False
-    except Exception as e:
-        logger.error(f"Error validating audio file: {e}")
+    except ValueError as e:  # Catch only expected exceptions
+        logger.error(f"Value error while processing audio: {e}")
         return False
+    except OSError as e:  # Example: Handle file-related errors
+        logger.error(f"OS error during audio processing: {e}")
+        return False
+    else:
+        return True
+def _transcribe_and_clean(audio_file: str) -> str:
+    """Transcribe and clean the audio file."""
+    logger.info("Step 1: Transcribing Audio...")
+    transcription = transcribe_audio(audio_file)
+
+    if not transcription:
+        logger.warning(f"Transcription failed for file: {audio_file}.")
+        return ""
+
+    logger.info("Cleaning Transcript...")
+    return clean_text(transcription)
+
 
 def process_audio_file(
         audio_file: str,
@@ -71,16 +87,9 @@ def process_audio_file(
     ) -> dict:
     """Process the audio file and extract necessary information."""
     try:
-        logger.info("Step 1: Transcribing Audio...")
-        transcription = transcribe_audio(audio_file)
-
-        if not transcription:
-            logger.warning(f"Transcription failed for file: {audio_file}.")
+        cleaned_transcript = _transcribe_and_clean(audio_file)
+        if not cleaned_transcript:
             return {"error": "Transcription failed"}
-
-        # Cleaning transcript
-        logger.info("Cleaning Transcript...")
-        cleaned_transcript = clean_text(transcription)
         msg = f"Cleaned Transcript (First 100 chars): {cleaned_transcript[:100]}..."
         logger.info(msg)
 
@@ -162,10 +171,6 @@ def process_audio_file(
     except FileNotFoundError:
         logger.error(f"File not found: {audio_file}")
         return {"error": "File not found"}
-
-    except (ValueError, KeyError, TypeError) as e:  # Handle expected exceptions
-        logger.exception(f"Unexpected error while processing {audio_file}: {e}")
-        return {"error": "Internal processing error", "message": str(e)}
 
 def validate_and_process(
         audio_file: str,
