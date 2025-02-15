@@ -1,0 +1,11 @@
+[tool.uv]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "pyyaml",
+    "toml"
+]
+[tool.ruff]
+line-length = 88
+select = ["ALL"]

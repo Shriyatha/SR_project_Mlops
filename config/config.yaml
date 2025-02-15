@@ -1,0 +1,33 @@
+required_phrases:
+  greetings:
+    - "good morning"
+    - "good afternoon"
+    - "good evening"
+    - "hi"
+    - "hello"
+    - "hey"
+    - "how are you"
+    - "hope you're doing well"
+  disclaimers:
+    - "this call will be recorded"
+    - "I will be recording this call"
+    - "this conversation is being recorded for quality assurance"
+    - "your call may be monitored or recorded"
+    - "for training purposes, this call is being recorded"
+  closing_statements:
+    - "Thank you"
+    - "Goodbye"
+    - "Have a great day"
+    - "Thanks for calling"
+    
+prohibited_phrases:
+  - "shit"
+  - "crap"
+  - "damn"
+  - "fuck"
+  - "bastard"
+  - "asshole"
+  - "dumbass"
+  - "stupid"
+  - "son of a bitch"
+  - "bloody hell"

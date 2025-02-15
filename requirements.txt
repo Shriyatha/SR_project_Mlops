@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+loguru
+pydub
+pydantic
+gradio
+gradio
+pydub
+loguru

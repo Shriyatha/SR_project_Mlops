@@ -1,0 +1,22 @@
+site_name: Customer Service AI
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.instant
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Functionality & Usage: functionality.md
+  - Experience: experience.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tasklist
+  - attr_list
+  - md_in_html
+  - pymdownx.tabbed
+  - admonition
+  - codehilite

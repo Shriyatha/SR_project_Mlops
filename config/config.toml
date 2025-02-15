@@ -1,0 +1,11 @@
+[logging]
+log_file_name = "logs/unified_logs.log"
+log_rotation = "10MB"
+log_compression = "zip"
+min_log_level = "INFO"
+logging_server_port_no = 5555
+
+[server]
+port_no = 8000
+number_of_workers = 4
+timeout_keep_alive = 300
