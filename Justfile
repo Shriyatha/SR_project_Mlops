@@ -1,12 +1,14 @@
-# ✅ Install dependencies using uv
-setup:
-    uv venv .venv
-    source .venv/bin/activate
-    uv pip install --system -r requirements.txt
+PYTHON := `command -v python3 || command -v python`
 
-# ✅ Run the entire system (Logging Server + FastAPI + Gradio UI)
+setup:
+    uv venv .venv_test
+    source .venv_test/bin/activate
+    {{PYTHON}} -m ensurepip
+    uv pip install --system -r requirements.txt
+    {{PYTHON}} -m spacy download en_core_web_sm
+
 run:
-    source .venv/bin/activate && \
-    python logging_server.py & sleep 2 && \
+    bash -c "source .venv/bin/activate && \
+    {{PYTHON}} logging_server.py & sleep 2 && \
     uvicorn main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 300 & sleep 2 && \
-    python gui.py && wait
+    {{PYTHON}} gui.py && wait"

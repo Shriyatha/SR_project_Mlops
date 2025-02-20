@@ -39,8 +39,12 @@ interface = gr.Interface(
     inputs=gr.Audio(type="filepath", label="Upload Audio File"),
     outputs="json",
     title="Audio Processing App",
-    description="Upload an audio file (.wav or .mp3) to process it.",
+    description="Upload an audio file (.wav or .mp3) for processing.",
+    live=True,  # Enables real-time updates
+    allow_flagging="never",  # Disable unnecessary flagging
+    examples=[["example_audio.wav"], ["example_audio.mp3"]],  # Provide sample files
+    theme="soft",  # Improve UI aesthetics
 )
 
 if __name__ == "__main__":
-    interface.launch()
+    interface.launch(server_name="0.0.0.0", server_port=7860, debug=True)
