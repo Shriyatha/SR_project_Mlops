@@ -14,7 +14,7 @@ torchaudio
 whisper
 
 # Machine Learning & NLP
-spacy
+spacy==3.6.1
 transformers
 nltk
 textblob
