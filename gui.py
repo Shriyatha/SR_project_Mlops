@@ -7,11 +7,23 @@ import httpx
 
 API_URL = "http://127.0.0.1:8000/process-audio/"
 status_code = 200
+
 def gradio_interface(audio_file: str) -> dict:
-    """Call FastAPI backend to process the uploaded audio file."""
+    """Call FastAPI backend to process the uploaded audio file.
+
+    Args:
+        audio_file (str): The path to the audio file to be processed.
+
+    Returns:
+        dict: The response from the backend or an error message.
+
+    """
     try:
-        with Path.open(audio_file, "rb") as file_data:
-            files = {"audio_file": (audio_file, file_data, "audio/wav")}
+        # Use Path to create a Path object from the audio_file string
+        audio_path = Path(audio_file)
+
+        with audio_path.open("rb") as file_data:
+            files = {"audio_file": (audio_path.name, file_data, "audio/wav")}
 
             # Increase timeout to prevent request failures
             with httpx.Client(timeout=300.0) as client:  # 300 seconds (5 minutes)
@@ -47,4 +59,5 @@ interface = gr.Interface(
 )
 
 if __name__ == "__main__":
-    interface.launch(server_name="0.0.0.0", server_port=7860, debug=True)
+    # Consider changing "0.0.0.0" to "127.0.0.1" for local testing
+    interface.launch(server_name="127.0.0.1", server_port=7860, debug=True)
