@@ -34,17 +34,17 @@ def start_logging_server() -> None:
             level: str = log_message.get("level", "INFO")
             message: str = log_message.get("message", "No message")
 
-            match level:
-                case "DEBUG":
-                    logger.debug(message)
-                case "WARNING":
-                    logger.warning(message)
-                case "ERROR":
-                    logger.error(message)
-                case "CRITICAL":
-                    logger.critical(message)
-                case _:
-                    logger.info(message)
+            if level == "DEBUG":
+                logger.debug(message)
+            elif level == "WARNING":
+                logger.warning(message)
+            elif level == "ERROR":
+                logger.error(message)
+            elif level == "CRITICAL":
+                logger.critical(message)
+            else:
+                logger.info(message)
+
 
     except (zmq.ZMQError, ValueError) as e:
         logger.error(f"Logging server error: {e}")
