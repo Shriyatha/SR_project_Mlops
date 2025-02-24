@@ -54,7 +54,6 @@ interface = gr.Interface(
     description="Upload an audio file (.wav or .mp3) for processing.",
     live=True,  # Enables real-time updates
     allow_flagging="never",  # Disable unnecessary flagging
-    examples=[["example_audio.wav"], ["example_audio.mp3"]],  # Provide sample files
     theme="soft",  # Improve UI aesthetics
 )
 

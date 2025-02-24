@@ -23,13 +23,10 @@ from services.utils import clean_text
 warnings.filterwarnings(
     "ignore", category=UserWarning, message=".*FP16 is not supported on CPU.*",
 )
-
 warnings.filterwarnings(
-    "ignore",
-    category=UserWarning,
+    "ignore", category=UserWarning,
     message="The MPEG_LAYER_III subtype is unknown to TorchAudio",
 )
-
 warnings.filterwarnings("ignore", category=FutureWarning, message=".*torch.load.*")
 
 # Load logging configuration from config file
@@ -51,22 +48,15 @@ def validate_audio_file(file_path: str, supported_formats: list) -> bool:
     if file_extension not in supported_formats:
         logger.error(f"Unsupported file extension: {file_extension}")
         return False
-
     try:
         audio = AudioSegment.from_file(file_path)
         logger.info(f"Audio file loaded successfully: {file_path}")
         logger.info(f"Audio duration: {len(audio)} ms")
-    except CouldntDecodeError as e:
-        logger.error(f"Invalid audio content: {e}")
+    except (CouldntDecodeError, ValueError, OSError) as e:
+        logger.error(f"Error processing audio: {e}")
         return False
-    except ValueError as e:  # Catch only expected exceptions
-        logger.error(f"Value error while processing audio: {e}")
-        return False
-    except OSError as e:  # Example: Handle file-related errors
-        logger.error(f"OS error during audio processing: {e}")
-        return False
-    else:
-        return True
+    return True
+
 def _transcribe_and_clean(audio_file: str) -> str:
     """Transcribe and clean the audio file."""
     logger.info("Step 1: Transcribing Audio...")
@@ -79,115 +69,121 @@ def _transcribe_and_clean(audio_file: str) -> str:
     logger.info("Cleaning Transcript...")
     return clean_text(transcription)
 
+def sentimental_ana(cleaned_transcript: str) -> dict:
+    """Perform sentiment analysis on the cleaned transcript."""
+    logger.info("Performing sentiment analysis...")
+    return analyze_sentiment(cleaned_transcript)
 
-def process_audio_file(
-        audio_file: str,
-        required_phrases: dict,
-        prohibited_phrases: set,
-    ) -> dict:
-    """Process the audio file and extract necessary information."""
+def call_category(cleaned_transcript: str) -> list:
+    """Categorize the call based on the cleaned transcript."""
+    logger.info("Categorizing the call...")
+    return categorize_call(cleaned_transcript)
+
+def process_audio_file(audio_file: str,
+        required_phrases: dict, prohibited_phrases: set) -> dict:
+    """Process the audio file and extract all possible information."""
     try:
+        logger.info(f"Processing started for file: {audio_file}")
+
+        # Transcription & Cleaning
+        logger.info("Starting transcription and cleaning process...")
         cleaned_transcript = _transcribe_and_clean(audio_file)
         if not cleaned_transcript:
+            logger.error("Transcription failed.")
             return {"error": "Transcription failed"}
-        msg = f"Cleaned Transcript (First 100 chars): {cleaned_transcript[:100]}..."
-        logger.info(msg)
+        logger.info("Transcription completed.")
 
-        # Compliance Check
-        logger.info("Step 2: Checking Compliance...")
+        logger.info("Performing compliance check...")
         compliance_issues = check_compliance(cleaned_transcript, required_phrases)
+        compliant_categories = {k: v for k, v in compliance_issues.items() if v}
         if compliance_issues:
-            logger.warning(f"Compliance Issues Found: {compliance_issues}")
-        else:
-            logger.info("All required compliance phrases are present.")
-        logger.info("Compliance Check Completed.")
+            logger.warning(f"Compliance issues found: {compliance_issues}")
 
-        # Prohibited Phrases Check
-        logger.info("Step 3: Checking for prohibited phrases...")
+        logger.info("Checking for prohibited phrases...")
         contains_prohibited = check_profanity(cleaned_transcript, prohibited_phrases)
         if contains_prohibited:
-            logger.warning("Prohibited phrases detected. Masking now...")
-            cleaned_transcript = mask_profanity(cleaned_transcript, prohibited_phrases)
-        logger.info("Profanity Check Completed.")
+            logger.warning("Prohibited phrases detected.")
+            masked_transcript = mask_profanity(cleaned_transcript, prohibited_phrases)
+            logger.info("Prohibited phrases masked.")
+        else:
+            masked_transcript = cleaned_transcript
+            logger.info("No prohibited phrases detected.")
 
         # PII Check
-        logger.info("Step 4: Checking for PII...")
+        logger.info("Checking for PII...")
         detected_pii = check_pii(cleaned_transcript)
-        cleaned_transcript = mask_pii(cleaned_transcript)
-        logger.info(f"Detected PII: {detected_pii}")
-        logger.info("PII Check Completed.")
+        if detected_pii:
+            logger.warning(f"Detected PII: {detected_pii}")
+        masked_transcript = mask_pii(masked_transcript)
+        logger.info("PII masked if found.")
 
-        # Extract timestamps for found phrases
-        logger.info("Step 5: Extracting timestamps for detected phrases...")
-        found_phrases = extract_timestamps(cleaned_transcript, required_phrases)
-        for category, phrases in found_phrases.items():
-            for phrase, start, end in phrases:
-                logger.info(f"{category.capitalize()}: '{phrase}' at [{start}, {end}]")
-        logger.info("Timestamps extraction completed.")
+        # Extract timestamps (ONLY for compliant categories)
+        logger.info("Extracting timestamps for found compliant phrases...")
+        found_phrases = extract_timestamps(cleaned_transcript,
+                            required_phrases, compliant_categories)
+        if found_phrases:
+            logger.info(f"Timestamps extracted: {found_phrases}")
+        else:
+            logger.info("No timestamps found for compliant phrases.")
 
         # Sentiment Analysis
-        logger.info("Step 6: Performing Sentiment Analysis...")
-        sentiment_result = analyze_sentiment(cleaned_transcript)
+        sentiment_result = sentimental_ana(cleaned_transcript)
         logger.info(f"Sentiment Analysis Result: {sentiment_result}")
 
         # Speaking Speed Analysis
-        logger.info("Step 7: Speaking Speed Analysis...")
+        logger.info("Calculating speaking speed...")
         audio_duration = get_audio_duration(audio_file)
         wpm, evaluation = calculate_wpm(cleaned_transcript, audio_duration)
         logger.info(f"Speaking Speed: {wpm} WPM ({evaluation})")
 
         # Categorization
-        logger.info("Step 8: Categorizing Call...")
-        call_category = categorize_call(cleaned_transcript)
-        logger.info(f"Call Category: {call_category}")
+        call_category11 = call_category(cleaned_transcript)
+        logger.info(f"Call categorized as: {call_category11}")
 
         # Speaker Diarization
-        logger.info("Step 9: Performing Speaker Diarization...")
+        logger.info("Performing speaker diarization...")
         diarization_results = analyze_speaker_diarization(audio_file)
-        logger.info(
-            f"Customer-to-Agent Speaking Ratio: "
-            f"{diarization_results['speaking_ratio']}",
-        )
-        logger.info(f"Agent Interruptions: {diarization_results['interruptions']}")
-        logger.info(f"Average TTFT: {diarization_results['ttft']} seconds")
+        logger.info(f"Diarization results: {diarization_results}")
 
-        # Return final analysis results
+        # Compile results
         result = {
             "transcription": cleaned_transcript,
+            "masked_transcription": masked_transcript,
             "compliance_issues": compliance_issues,
             "contains_prohibited": contains_prohibited,
+            "detected_pii": detected_pii,
+            "timestamps": found_phrases,
             "sentiment": sentiment_result,
             "speaking_speed": {"wpm": wpm, "evaluation": evaluation},
-            "call_category": call_category,
+            "call_category": call_category11,
             "diarization": diarization_results,
-            "cleaned_transcript": cleaned_transcript,
+            "audio_duration_ms": audio_duration,
         }
-
-        if result:
-            logger.info("Processing completed successfully.")
-            return result
-        logger.warning("Processing did not return a valid result.")
+        logger.info("Processing completed successfully.")
 
     except FileNotFoundError:
         logger.error(f"File not found: {audio_file}")
         return {"error": "File not found"}
+    else:
+        return result
 
-def validate_and_process(
-        audio_file: str,
-        required_phrases: dict,
-        prohibited_phrases: set,
-    ) -> dict:
+def validate_and_process(audio_file: str,
+        required_phrases: dict, prohibited_phrases: set) -> dict:
     """Validate the audio file and process it."""
-    logger.info(f"Initializing process for file: {audio_file}")
+    logger.info(f"[START] Processing audio file: {audio_file}")
 
-    # Supported audio formats
     supported_formats = [".wav", ".mp3"]
-
-    # Validate the audio file
     if not validate_audio_file(audio_file, supported_formats):
-        logger.error(f"Validation failed for file: {audio_file}")
+        logger.error("[ERROR] Invalid audio format. Aborting processing.")
         return {"error": "Invalid audio format"}
 
-    # Process the audio file
-    logger.info(f"Processing file: {audio_file}")
-    return process_audio_file(audio_file, required_phrases, prohibited_phrases)
+    logger.info("[STEP 1] Valid Audio File Confirmed. Proceeding with transcription...")
+    result = process_audio_file(audio_file, required_phrases, prohibited_phrases)
+
+    if "error" in result:
+        logger.error(f"[FAILURE] Processing failed: {result['error']}")
+    else:
+        logger.info(f"[SUCCESS] Processing completed successfully for {audio_file}")
+
+    return result
+
