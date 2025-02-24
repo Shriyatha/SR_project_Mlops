@@ -1,12 +1,27 @@
 """Speech Diarization Module."""
 
+import os
 from collections import defaultdict
 from typing import Any
 
+from dotenv import load_dotenv
 from pyannote.audio.pipelines import SpeakerDiarization
 
 # Load pretrained pipeline from Hugging Face
-pipeline = SpeakerDiarization.from_pretrained("pyannote/speaker-diarization-3.0")
+load_dotenv()
+
+# Get Hugging Face token from environment
+HF_TOKEN = os.getenv("HUGGINGFACE_AUTH_TOKEN")
+
+if HF_TOKEN is None:
+    error_msg = "HUGGINGFACE_AUTH_TOKEN is not set. Please check your .env file."
+    raise ValueError(error_msg)
+
+# Load pretrained pipeline from Hugging Face using the token
+pipeline = SpeakerDiarization.from_pretrained(
+    "pyannote/speaker-diarization-3.0",
+    use_auth_token=HF_TOKEN,
+)
 
 MIN_SPEAKERS = 2  # Constant to replace magic number
 
