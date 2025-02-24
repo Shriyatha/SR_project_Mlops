@@ -10,7 +10,7 @@ setup:
     uv venv .venv_test
     source .venv_test/bin/activate
     {{PYTHON}} -m ensurepip --default-pip
-    uv pip install --system -r requirements.txt
+    uv pip install -r requirements.txt
     {{PYTHON}} -m pip install --upgrade pip
     uv pip install git+https://github.com/openai/whisper.git
     {{PYTHON}} -m spacy download en_core_web_sm
