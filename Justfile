@@ -1,9 +1,14 @@
+# Set shell mode to work with environment variables
+set shell := ["bash", "-c"]
+
+# Load environment variables from .env file
+set dotenv-load
+
 PYTHON := `command -v python3 || command -v python`
 
 setup:
     uv venv .venv_test
     source .venv_test/bin/activate
-    export HUGGINGFACE_AUTH_TOKEN="hf_YjPnMsLWkcmpIsKTTkYJdRvZecApkLeXR"
     {{PYTHON}} -m ensurepip --default-pip
     uv pip install --system -r requirements.txt
     {{PYTHON}} -m pip install --upgrade pip
@@ -11,11 +16,11 @@ setup:
     {{PYTHON}} -m spacy download en_core_web_sm
 
 run:
-    bash -c "source .venv_test/bin/activate && \
-    export HUGGINGFACE_AUTH_TOKEN='hf_YjPnMsLWkcmpIsKTTkYJdRvZecApkLeXR' && \
-    {{PYTHON}} logging_server.py & sleep 2 && \
-    uvicorn main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 300 & sleep 2 && \
-    {{PYTHON}} gui.py && wait"
+    source .venv_test/bin/activate
+    {{PYTHON}} logging_server.py & sleep 2
+    uvicorn main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 300 & sleep 2
+    {{PYTHON}} gui.py
+    wait
 
-docs: 
+docs:
     mkdocs serve
