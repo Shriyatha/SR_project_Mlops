@@ -16,3 +16,6 @@ run:
     {{PYTHON}} logging_server.py & sleep 2 && \
     uvicorn main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 300 & sleep 2 && \
     {{PYTHON}} gui.py && wait"
+
+docs: 
+    mkdocs serve

@@ -10,15 +10,15 @@ required_phrases:
     - "hope you're doing well"
   disclaimers:
     - "this call will be recorded"
-    - "I will be recording this call"
+    - "i will be recording this call"
     - "this conversation is being recorded for quality assurance"
     - "your call may be monitored or recorded"
     - "for training purposes, this call is being recorded"
   closing_statements:
-    - "Thank you"
-    - "Goodbye"
-    - "Have a great day"
-    - "Thanks for calling"
+    - "thank you"
+    - "goodbye"
+    - "have a great day"
+    - "thanks for calling"
     
 prohibited_phrases:
   - "shit"

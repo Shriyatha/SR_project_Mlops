@@ -1,15 +1,15 @@
-```markdown
-# Experience & Lessons Learned
+## ✅ What Worked Well
+- Transcription using `whisper` performed accurately with minimal errors.
+- Compliance checks detected missing phrases effectively.
+- Speaker diarization improved call categorization.
 
-## What Worked Well
-- Using `FastAPI` and `Gradio` made API development and UI integration seamless.
-- `Pydantic` validation for YAML & TOML configurations ensured data integrity.
-- `mkdocs-material` provided an easy-to-maintain documentation setup.
+## ❌ Challenges
+- **PII Detection:** Some false positives in entity recognition.
+- **Performance:** Processing large audio files took longer than expected.
 
-## Challenges Faced
-- Handling large audio files led to timeout issues, which we fixed by increasing `httpx` timeouts.
-- Ensuring compliance checks work correctly with different accents required additional tuning.
+## 🔥 Lessons Learned
+- **Fine-tuning models** for sentiment analysis improved accuracy.
+- **Logging** played a crucial role in debugging compliance failures.
+- **Parallel processing** could speed up execution.
 
-## What I Learned
-- Modularizing code and using configuration files (`config.yaml` & `config.toml`) made the system scalable.
-- Automating setup with `uv` and `just` greatly simplified deployment.
+Overall, the project was an exciting challenge in **audio processing, NLP, and AI-driven compliance analysis.**

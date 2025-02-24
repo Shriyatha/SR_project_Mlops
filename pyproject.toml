@@ -40,7 +40,7 @@ jsonschema = "*"
 gradio = "*"
 
 # Documentation
-mkdocs-material = "*"
+mkdocs-material = ">=9.6.4"
 pymdown-extensions = "*"
 pygments = "*"
 
