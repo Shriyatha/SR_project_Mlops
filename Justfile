@@ -9,11 +9,12 @@ PYTHON := `command -v python3 || command -v python`
 setup:
     uv venv .venv_test
     source .venv_test/bin/activate
-    {{PYTHON}} -m ensurepip --default-pip
     uv pip install -r requirements.txt
-    {{PYTHON}} -m pip install --upgrade pip
+    uv pip install --upgrade pip
     uv pip install git+https://github.com/openai/whisper.git
+    uv pip install spacy
     {{PYTHON}} -m spacy download en_core_web_sm
+    test -f .env || cp .env.template .env
 
 run:
     source .venv_test/bin/activate
@@ -22,5 +23,7 @@ run:
     {{PYTHON}} gui.py
     wait
 
-docs:
+docs: 
     mkdocs serve
+
+

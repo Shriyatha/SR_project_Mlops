@@ -36,8 +36,6 @@ Use the tabs above to navigate through each section.
 
 The *Customer Service AI* project was created by:
 
-| <img src="1000104756.jpg"  width="75"/> | <img src="1000104756.jpg"  width="75"/> |
-|:----------------------------------------:|:-----------------------------------------:|
 | *A.Shriyatha*                          | *S.Jayati*                        |
 
 We are passionate about leveraging AI to make customer service more efficient and meaningful.
